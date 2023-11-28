@@ -1,64 +1,61 @@
-from sympy import symbols, lambdify
-import numpy as np
+# Defina a função h(x)
+def h(x):
+    return x**3 - 2*x**2 + 4
 
+# Defina a derivada de h(x), indicada como dh(x)
+def dh(x):
+    return 3*x**2 - 4*x
 
-def substituir_sen(expressao):
-    # Substitui 'sen' por 'sin' na expressão
-    return expressao.replace("sen", "sin")
+# Implementação do método de Newton
+def metodo_newton_customizado_v2(funcao, derivada, palpite_inicial, precisao=1e-3, max_iteracoes=100):
+    # Inicializa o contador de iterações
+    iteracao = 0
 
+    # Inicializa a estimativa atual para a raiz
+    x_atual = palpite_inicial
 
-def metodo_newton(expressao_funcao, expressao_derivada, ponto_inicial, precisao, max_iteracoes):
-    # Símbolo de variável
-    x = symbols('x')
+    # Inicializa o erro anterior com infinito positivo
+    erro_anterior = float('inf')
 
-    # Converte a expressão da função para uma função numérica
-    funcao_numerica = lambdify(x, expressao_funcao, 'numpy')
-    # Converte a expressão da derivada para uma função numérica
-    derivada_numerica = lambdify(x, expressao_derivada, 'numpy')
+    # Loop iterativo para o método de Newton
+    while iteracao < max_iteracoes:
+        # Calcula a próxima estimativa para a raiz
+        x_proximo = x_atual - funcao(x_atual) / derivada(x_atual)
 
-    for i in range(1, max_iteracoes + 1):
-        # Calcula o valor da função no ponto atual
-        valor_funcao = funcao_numerica(ponto_inicial)
-        # Calcula o valor da derivada no ponto atual
-        derivada_funcao = derivada_numerica(ponto_inicial)
+        # Calcula o erro entre as estimativas atual e próxima
+        erro = abs(x_proximo - x_atual)
 
-        if derivada_funcao == 0:
-            # Se a derivada é zero, o método não converge
-            print("A derivada é zero. O método não converge.")
-            return
+        # Imprime informações sobre a iteração atual
+        print("Numero Da Iteração {}: Raiz Aproximada = {:.6f}, Valor do erro = {:.6f}".format(iteracao, x_proximo, erro))
 
-        # Calcula o próximo ponto usando o método de Newton
-        ponto_proximo = ponto_inicial - valor_funcao / derivada_funcao
-        # Calcula o erro relativo
-        erro = np.abs((ponto_proximo - ponto_inicial) / ponto_proximo)
-
-        # Exibe informações sobre a iteração atual
-        print(
-            f"Iteração {i} - Ponto Inicial: {ponto_inicial:.6f}, Ponto Encontrado: {ponto_proximo:.6f}, Erro: {erro:.6f}")
-
+        # Verifica se o erro está abaixo da precisão especificada
         if erro < precisao:
-            # Se o erro é menor que a precisão desejada, a convergência é alcançada
-            print("Convergência alcançada.")
-            return
+            return x_proximo  # Retorna a raiz aproximada
 
-        # Atualiza o ponto inicial para o próximo ponto
-        ponto_inicial = ponto_proximo
+        # Atualiza a estimativa atual com a próxima estimativa
+        x_atual = x_proximo
 
-    # Se o número máximo de iterações for atingido sem convergência, exibe uma mensagem
-    print("Número máximo de iterações alcançado. A solução pode não ter convergido.")
+        # Incrementa o contador de iterações
+        iteracao += 1
 
+        # Verifica a não convergência comparando erros de iterações consecutivas
+        if erro_anterior < erro:
+            print("O método de Newton não converge para uma raiz.")
+            return None
 
-if __name__ == "__main__":
-    # Solicita as expressões da função e da derivada ao usuário
-    expressao_funcao = substituir_sen(input(
-        "Digite a expressão da função (use 'x' como variável, ^ substitua por **, escreva completo as multiplicações,segue um exemplo para uso: 4x ficaria 4*x.): "))
-    expressao_derivada = substituir_sen(input(
-        "Digite a expressão da derivada (use 'x' como variável, ^ substitua por **, escreva completo as multiplicações, segue um exemplo para uso: 4x ficaria 4*x.): "))
+        # Atualiza o erro anterior para a próxima iteração
+        erro_anterior = erro
 
-    # Solicita os parâmetros iniciais ao usuário
-    ponto_inicial = float(input("Digite o ponto inicial: "))
-    precisao = float(input("Digite a precisão: ").replace(',', '.'))  # Substituir ',' por '.' no valor de precisão
-    max_iteracoes = int(input("Digite a quantidade máxima de iterações: "))
+    # Se o método não convergir dentro do número máximo de iterações, imprime uma mensagem
+    print("O método de Newton não convergiu após {} iterações.".format(max_iteracoes))
+    return None  # Retorna None se o método não convergir
 
-    # Chama a função do método de Newton com os parâmetros fornecidos
-    metodo_newton(expressao_funcao, expressao_derivada, ponto_inicial, precisao, max_iteracoes)
+# Palpite inicial para a raiz
+palpite_inicial_v2 = 1.0
+
+# Chama o método de Newton com a função fornecida, sua derivada e o palpite inicial
+raiz_v2 = metodo_newton_customizado_v2(h, dh, palpite_inicial_v2)
+
+# Imprime o resultado se uma raiz for encontrada
+if raiz_v2 is not None:
+    print("A raiz é aproximadamente:", raiz_v2)
